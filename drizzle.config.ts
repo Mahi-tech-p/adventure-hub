@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 dotenv.config()
 
 export default defineConfig({
-  schema: "./src/database/schema/*",
+  schema: "./src/database/schema/",
   out: "./src/database/migrations",
   dialect: "postgresql",
   dbCredentials: {
