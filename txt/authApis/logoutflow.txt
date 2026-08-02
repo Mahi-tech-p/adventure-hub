@@ -1,0 +1,10 @@
+Refresh Token
+      │
+      ▼
+Hash Token
+      │
+      ▼
+Find Token
+      │
+      ▼
+Revoke/Delete Token

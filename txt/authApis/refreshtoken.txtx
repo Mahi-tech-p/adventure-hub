@@ -1,0 +1,22 @@
+Refresh Token
+      │
+      ▼
+Verify JWT
+      │
+      ▼
+Hash Token
+      │
+      ▼
+Find in Database
+      │
+      ▼
+Check Expiry
+      │
+      ▼
+Generate New Access Token
+      │
+      ▼
+Generate New Refresh Token
+      │
+      ▼
+Rotate Refresh Token

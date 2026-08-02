@@ -1,0 +1,107 @@
+adventure-hub/
+
+src/
+│
+├── config/
+├── controllers/
+├── database/
+├── middlewares/
+├── modules/
+├── routes/
+├── services/
+├── repositories/
+├── utils/
+├── types/
+├── validations/
+├── app.ts
+└── server.ts
+
+.env
+
+.gitignore
+
+package.json
+
+tsconfig.json
+
+modules/
+├── auth/
+├── users/
+├── organizations/
+├── parks/
+├── activities/
+├── slots/
+├── bookings/
+├── tickets/
+├── payments/
+├── memberships/
+├── pricing/
+├── notifications/
+├── reports/
+└── attachments/
+
+
+adventure-hub/
+│
+├── docker-compose.yml
+├── Dockerfile                 (Later)
+├── package.json
+├── tsconfig.json
+├── drizzle.config.ts
+├── .env
+├── .env.example
+│
+└── src/
+    │
+    ├── app.ts
+    ├── server.ts
+    │
+    ├── config/
+    │     ├── env.ts
+    │     ├── cors.ts
+    │     ├── logger.ts
+    │     └── index.ts
+    │
+    ├── constants/
+    │
+    ├── db/
+    │     ├── index.ts
+    │     ├── migrations/
+    │     └── schema/
+    │            └── index.ts
+    │
+    ├── middleware/
+    │
+    ├── errors/
+    │
+    ├── authorization/
+    │
+    ├── redis/
+    │
+    ├── shared/
+    │     ├── logger/
+    │     ├── helpers/
+    │     ├── response/
+    │     ├── pagination/
+    │     ├── validators/
+    │     └── types/
+    │
+    ├── storage/
+    │
+    ├── utils/
+    │
+    └── modules/
+          │
+          ├── auth/
+          ├── users/
+          ├── organizations/
+          ├── parks/
+          ├── activities/
+          ├── slots/
+          ├── bookings/
+          ├── tickets/
+          ├── pricing/
+          ├── payments/
+          ├── memberships/
+          ├── notifications/
+          └── reports/

@@ -1,0 +1,50 @@
+Register DTO
+      │
+      ▼
+Check email exists
+      │
+      ▼
+Hash password
+      │
+      ▼
+Create User
+      │
+      ▼
+Generate Access Token
+      │
+      ▼
+Generate Refresh Token
+      │
+      ▼
+Hash Refresh Token
+      │
+      ▼
+Store Refresh Token
+      │
+      ▼
+Return User + Tokens
+
+
+Register
+    │
+    ▼
+Repository → Check email
+    │
+    ▼
+hashPassword()
+    │
+    ▼
+Repository → Create user
+    │
+    ▼
+generateAccessToken()
+generateRefreshToken()
+    │
+    ▼
+hashToken()
+    │
+    ▼
+Repository → Store refresh token
+    │
+    ▼
+Return response
