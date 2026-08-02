@@ -1,0 +1,7 @@
+import { db } from "./db.js";
+
+export type Transaction = Parameters<
+  Parameters<typeof db.transaction>[0]
+>[0];
+
+export type DBClient = typeof db | Transaction;

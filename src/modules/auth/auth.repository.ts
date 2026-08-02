@@ -1,76 +1,108 @@
 import { eq } from "drizzle-orm";
+
 import { db } from "../../database/db.js";
 import { refreshTokens, users } from "./auth.schema.js";
-import { NewRefreshToken, NewUser, RefreshToken } from "./auth.types.js";
+import {
+  NewRefreshToken,
+  NewUser,
+} from "./auth.types.js";
+import { DBClient } from "../../database/types.js";
 
 
+export class AuthRepository {
+  // ===========================
+  // Users
+  // ===========================
 
-class AuthRepository {
-    //create user in DB
-    async createUser(user: NewUser) {
-        const [createdUser] = await db.insert(users).values(user).returning();
-        return createdUser;
-    }
+  async createUser(client: DBClient, user: NewUser) {
+    const [createdUser] = await client
+      .insert(users)
+      .values(user)
+      .returning();
 
-    //findUserByEmail
-    async findUserByEmail(email: string) {
-        const [user] = await db.select().from(users).where(eq(users.email, email))
-        return user
-    }
+    return createdUser;
+  }
 
-    //findUserById
-    async findUserById(userId: string) {
-        const [user] = await db.select().from(users).where(eq(users.id, userId))
-        return user;
-    }
+  async findUserByEmail(email: string) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
 
-    //UpdateLastLogin
-    async updateLastLogin(userId: string) {
-        await db
-            .update(users)
-            .set({
-                lastLoginedAt: new Date()
-            })
-            .where(eq(users.id, userId))
-    }
+    return user;
+  }
 
-    //createRefresh Token
-    async createRefreshToken(token: NewRefreshToken) {
-        const [createdToken] = await db
-            .insert(refreshTokens)
-            .values(token)
-            .returning()
-        return createdToken
-    }
+  async findUserById(userId: string) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
 
-    //Find Refresh Token
-    async findRefreshToken(hashedToken: string) {
-        const [token] = await db
-            .select()
-            .from(refreshTokens)
-            .where(eq(refreshTokens.hashedToken, hashedToken))
-        return token
-    }
+    return user;
+  }
 
-    //Rewoke Refresh Token
-    async revokeRefreshToken(id: string) {
-        await db
-            .update(refreshTokens)
-            .set({
-                isRevoked: true,
-                revokedAt: new Date(),
-            })
-            .where(eq(refreshTokens.id, id));
-    }
+  async updateLastLogin(client: DBClient, userId: string) {
+    await client
+      .update(users)
+      .set({
+        lastLoginedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
 
-    //delete refresh token
+  // ===========================
+  // Refresh Tokens
+  // ===========================
 
-    async deleteRefreshToken(id: string) {
-        await db
-            .delete(refreshTokens)
-            .where(eq(refreshTokens.id, id));
-    }
+  async createRefreshToken(
+    client: DBClient,
+    token: NewRefreshToken
+  ) {
+    const [createdToken] = await client
+      .insert(refreshTokens)
+      .values(token)
+      .returning();
 
+    return createdToken;
+  }
+
+  async findRefreshToken(hashedToken: string) {
+    const [token] = await db
+      .select()
+      .from(refreshTokens)
+      .where(eq(refreshTokens.hashedToken, hashedToken));
+
+    return token;
+  }
+
+  async revokeRefreshToken(client: DBClient, id: string) {
+    await client
+      .update(refreshTokens)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(eq(refreshTokens.id, id));
+  }
+
+  async deleteRefreshToken(client: DBClient, id: string) {
+    await client
+      .delete(refreshTokens)
+      .where(eq(refreshTokens.id, id));
+  }
+
+  async revokeAllRefreshTokens(
+    client: DBClient,
+    userId: string
+  ) {
+    await client
+      .update(refreshTokens)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(eq(refreshTokens.userId, userId));
+  }
 }
 
 export const authRepository = new AuthRepository();
