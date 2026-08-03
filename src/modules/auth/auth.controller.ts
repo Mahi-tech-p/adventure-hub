@@ -4,10 +4,7 @@ import { authService } from "./auth.service.js";
 import { success } from "zod";
 
 export class AuthController {
-  register = async (
-    req: Request,
-    res: Response
-  ) => {
+  register = async (req: Request, res: Response) => {
     const result = await authService.register(req.body);
 
     return res.status(201).json({
@@ -17,15 +14,25 @@ export class AuthController {
     });
   };
 
-  login = async(req: Request, res: Response)=>{
-    const result = await authService.login(req.body)
+  login = async (req: Request, res: Response) => {
+    const result = await authService.login(req.body);
 
     return res.status(200).json({
-      success : true,
-      message : "Logined SucessFully",
-      data: result
-    })
-  }
+      success: true,
+      message: "Logined SucessFully",
+      data: result,
+    });
+  };
+
+  refreshToken = async (req: Request, res: Response) => {
+    const result = await authService.refreshToken(req.body.refreshToken);
+
+    return res.status(200).json({
+      success: true,
+      message: "Token refreshed successfully.",
+      data: result,
+    });
+  };
 }
 
 export const authController = new AuthController();
