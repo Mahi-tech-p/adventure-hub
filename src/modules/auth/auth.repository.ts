@@ -10,9 +10,6 @@ import { DBClient } from "../../database/types.js";
 
 
 export class AuthRepository {
-  // ===========================
-  // Users
-  // ===========================
 
   async createUser(client: DBClient, user: NewUser) {
     const [createdUser] = await client
@@ -50,9 +47,6 @@ export class AuthRepository {
       .where(eq(users.id, userId));
   }
 
-  // ===========================
-  // Refresh Tokens
-  // ===========================
 
   async createRefreshToken(
     client: DBClient,

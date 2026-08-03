@@ -6,7 +6,7 @@ const SALT_ROUNDS = process.env.SALT_ROUNDS || 12
 
 // Hash Plain Password
 
-export const hashPassword = async (password: string): Promise<String> => {
+export const hashPassword = async (password: string): Promise<string> => {
     return bcrypt.hash(password, SALT_ROUNDS)
 }
 
