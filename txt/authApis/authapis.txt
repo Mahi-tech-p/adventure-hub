@@ -1,4 +1,9 @@
-xPOST /api/v1/auth/register
+xPOST /api/v1/auth/register✅
+POST /api/v1/auth/ ✅
+POST /api/v1/auth/logout
+POST /api/v1/auth/refresh-token
+GET  /api/v1/auth/me
+
 POST /api/v1/auth/login
 POST /api/v1/auth/logout
 POST /api/v1/auth/refresh-token

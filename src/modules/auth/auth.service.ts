@@ -1,8 +1,11 @@
 import { db } from "../../database/db.js";
 
 import { ConflictError } from "../../Errors/ConflictError.js";
+import { ForbiddenError } from "../../Errors/ForbiddenError.js";
+import { UnauthorizedError } from "../../Errors/UnauthorizedError.js";
 
 import {
+  comparePassword,
   generateAccessToken,
   generateRefreshToken,
   hashPassword,
@@ -12,12 +15,15 @@ import {
 
 import {
   AuthResponseDto,
+  LoginDto,
   RegisterDto,
 } from "./auth.dto.js";
 
 import { authRepository } from "./auth.repository.js";
 
 export class AuthService {
+
+  //Register Endpoint Service
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
     const existingUser = await authRepository.findUserByEmail(dto.email);
 
@@ -60,6 +66,64 @@ export class AuthService {
         refreshToken,
       };
     });
+  }
+
+  // Login Endpoint service
+
+  async login(dto: LoginDto): Promise<AuthResponseDto>{
+    //Find user
+
+    const user = await authRepository.findUserByEmail(dto.email)
+
+    if(!user){
+      throw new UnauthorizedError("Invalid email or password")
+    }
+
+    if(!user.isActive){
+      throw new ForbiddenError("Your account has been deactivated")
+    }
+
+    const isPasswordValid = await comparePassword(dto.password, user.passwordHash)
+
+    if(!isPasswordValid){
+      throw new UnauthorizedError("Invalid Username or Password")
+    }
+
+    return db.transaction(async(tx)=>{
+      await authRepository.updateLastLogin(tx, user.id)
+
+
+      //JWT Payload
+
+      const payload :JwtPayload = {
+        userId : user.id,
+        email : user.email
+      }
+
+      //Generate Tokens
+
+      const accessToken  =  generateAccessToken(payload)
+      const refreshToken = generateRefreshToken(payload)
+
+      //save refreshedHashedToken
+
+      await authRepository.createRefreshToken(tx,{
+        userId: user.id,
+        hashedToken: hashToken(refreshToken),
+        expiresAt: new Date( Date.now() +7*24*60*60*1000),
+
+      })
+
+      return {
+        user:{
+          id: user.id,
+          fullName : user.fullName,
+          email : user.email
+        },
+        accessToken,
+        refreshToken
+      }
+    })
   }
 }
 

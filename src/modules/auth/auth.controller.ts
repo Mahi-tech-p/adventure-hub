@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import { authService } from "./auth.service.js";
+import { success } from "zod";
 
 export class AuthController {
   register = async (
@@ -15,6 +16,16 @@ export class AuthController {
       data: result,
     });
   };
+
+  login = async(req: Request, res: Response)=>{
+    const result = await authService.login(req.body)
+
+    return res.status(200).json({
+      success : true,
+      message : "Logined SucessFully",
+      data: result
+    })
+  }
 }
 
 export const authController = new AuthController();
