@@ -2,7 +2,7 @@
 import dotenv from "dotenv"
 dotenv.config()
 import bcrypt from "bcrypt";
-const SALT_ROUNDS = process.env.SALT_ROUNDS || 12
+const SALT_ROUNDS = 12
 
 // Hash Plain Password
 
