@@ -1,4 +1,4 @@
-import { varchar } from "drizzle-orm/pg-core";
+import { date, text, varchar } from "drizzle-orm/pg-core";
 import { timestamp } from "drizzle-orm/pg-core";
 import { inet } from "drizzle-orm/pg-core";
 import { boolean } from "drizzle-orm/pg-core";
@@ -15,7 +15,11 @@ export const users = pgTable("users", {
         .notNull(),
 
     email: varchar("email", { length: 255 }).unique().notNull(),
-
+    phone : varchar("phone",{length:15}),
+    dateOfBirth : date("date_of_birth"),
+    gender: varchar("gender",{length:20}),
+    avatarUrl : text("avatar_url"),
+    bio:text('bio'),
     passwordHash: varchar("password_hash", { length: 255 })
         .notNull(),
     isEmailVerified: boolean("is_email_verified")
