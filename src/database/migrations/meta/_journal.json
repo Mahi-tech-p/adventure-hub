@@ -15,6 +15,13 @@
       "when": 1785857636025,
       "tag": "0001_confused_rocket_raccoon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1785866171655,
+      "tag": "0002_amused_zaran",
+      "breakpoints": true
     }
   ]
 }

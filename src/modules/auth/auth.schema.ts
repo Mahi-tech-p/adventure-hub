@@ -20,6 +20,7 @@ export const users = pgTable("users", {
     gender: varchar("gender",{length:20}),
     avatarUrl : text("avatar_url"),
     bio:text('bio'),
+    avatarPublicId: text("avatar_public_id"),
     passwordHash: varchar("password_hash", { length: 255 })
         .notNull(),
     isEmailVerified: boolean("is_email_verified")
