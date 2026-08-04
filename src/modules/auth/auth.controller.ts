@@ -43,6 +43,26 @@ export class AuthController {
       data: result
     })
   }
+
+  logout = async(req: Request , res: Response)=>{
+
+    const result = await authService.logout(req.user.id, req.body)
+
+    return res.status(200).json({
+      success : true,
+      message: "User Logged out successfully",
+    })
+  }
+
+  logoutAll = async (req: Request, res: Response)=>{
+
+    const result = await authService.logoutAll(req.user.id)
+
+    return res.status(200).json({
+      success: true,
+      message:"Logged out from all devices"
+    })
+  }
 }
 
 export const authController = new AuthController();

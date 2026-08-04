@@ -14,7 +14,7 @@ import {
   verifyRefreshToken,
 } from "../../shared/security/index.js";
 
-import { AuthResponseDto, LoginDto, RegisterDto } from "./auth.dto.js";
+import { AuthResponseDto, LoginDto, logoutDto, RegisterDto } from "./auth.dto.js";
 
 import { authRepository } from "./auth.repository.js";
 
@@ -197,6 +197,32 @@ export class AuthService {
       email:user.email,
       fullName: user.fullName
     }
+  }
+
+  //logout
+
+  async logout(userId: string, dto: logoutDto): Promise<void>{
+
+    const hashedRefreshToken = hashToken(dto.refreshToken)
+
+    const storedHashToken = await authRepository.findRefreshToken(hashedRefreshToken)
+
+    if(!storedHashToken){
+      return ;
+    }
+    if(storedHashToken.userId !== userId){
+      throw new UnauthorizedError("Invalid Token..")
+    }
+    await db.transaction(async (tx)=>{
+      await authRepository.revokeRefreshToken(tx, storedHashToken.id)
+    })
+  }
+
+  //logout all
+  async logoutAll(userId: string): Promise<void>{
+    await db.transaction( async (tx)=>{
+      await authRepository.revokeRefreshToken(tx,userId)
+    })
   }
 }
 

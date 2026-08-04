@@ -19,3 +19,7 @@ export interface AuthResponseDto {
     accessToken: string,
     refreshToken: string
 }
+
+export interface logoutDto {
+    refreshToken: string
+}
