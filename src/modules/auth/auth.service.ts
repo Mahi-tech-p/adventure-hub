@@ -185,6 +185,19 @@ export class AuthService {
       };
     });
   }
+
+  //me
+  async me(userId: string){
+    const user = await authRepository.findUserById(userId)
+    if(!user){
+      throw new UnauthorizedError("User not found")
+    }
+    return{
+      id: user.id,
+      email:user.email,
+      fullName: user.fullName
+    }
+  }
 }
 
 export const authService = new AuthService();

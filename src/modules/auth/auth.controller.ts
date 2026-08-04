@@ -33,6 +33,16 @@ export class AuthController {
       data: result,
     });
   };
+
+  me = async(req: Request, res: Response)=>{
+    const result =  await authService.me(req.user.id)
+    
+    return res.status(200).json({
+      success:true,
+      message:"User fetched Successfully",
+      data: result
+    })
+  }
 }
 
 export const authController = new AuthController();

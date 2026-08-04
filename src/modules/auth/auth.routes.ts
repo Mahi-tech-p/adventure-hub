@@ -6,6 +6,7 @@ import { authController } from "./auth.controller.js";
 import { loginSchema, refreshTokenSchema, registerSchema } from "./auth.validation.js";
 import { validate } from "../../middlewares/validate.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 
 
 const router = Router();
@@ -26,4 +27,6 @@ router.post("/refresh-token",
   validate(refreshTokenSchema),
   asyncHandler(authController.refreshToken)
 )
+
+router.get("/me",authenticate,asyncHandler(authController.me))
 export default router;
