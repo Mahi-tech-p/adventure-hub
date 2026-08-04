@@ -18,6 +18,7 @@ class UserRepository {
       })
       .from(users)
       .where(eq(users.id, userId));
+      return user
   }
 
   async updateProfile(
