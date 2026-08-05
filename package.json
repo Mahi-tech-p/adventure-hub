@@ -34,6 +34,7 @@
     "multer": "^2.2.0",
     "postgres": "^3.4.9",
     "sharp": "^0.35.3",
+    "slugify": "^1.6.9",
     "zod": "^4.4.3"
   },
   "devDependencies": {
