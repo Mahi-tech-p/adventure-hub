@@ -50,6 +50,22 @@ export class UserController {
       data: profile,
     });
   };
+
+  changePassword = async (
+  req: Request,
+  res: Response
+) => {
+
+  await userService.changePassword(
+    req.user.id,
+    req.body
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Password changed successfully. Please login again.",
+  });
+};
 }
 
 export const userController = new UserController();

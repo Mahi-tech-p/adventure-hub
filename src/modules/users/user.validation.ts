@@ -9,3 +9,15 @@ export const updateProfileSchema  = z.object({
 
   bio: z.string().max(500).optional(),
 });
+
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(8)
+    .max(100),
+
+  newPassword: z
+    .string()
+    .min(8)
+    .max(100),
+});

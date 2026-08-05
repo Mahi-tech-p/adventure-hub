@@ -111,7 +111,19 @@ class UserRepository {
       });
       return user
   }
-
+  async updatePassword(
+  client: DBClient,
+  userId: string,
+  passwordHash: string
+) {
+  await client
+    .update(users)
+    .set({
+      passwordHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
+}
 }
 
 export const userRepository = new UserRepository();

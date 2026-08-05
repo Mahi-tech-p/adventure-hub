@@ -1,4 +1,5 @@
 import { db } from "../../database/db.js";
+import { DBClient } from "../../database/types.js";
 
 import { ConflictError } from "../../Errors/ConflictError.js";
 import { ForbiddenError } from "../../Errors/ForbiddenError.js";
@@ -224,6 +225,15 @@ export class AuthService {
       await authRepository.revokeRefreshToken(tx,userId)
     })
   }
+
+  async revokeAllSessions(
+    tx: DBClient,
+  userId: string
+): Promise<void> {
+  await authRepository.revokeAllRefreshTokens(tx,
+    userId
+  );
+}
 }
 
 export const authService = new AuthService();

@@ -4,9 +4,13 @@ import { DBClient } from "../../database/types.js";
 import { NotFoundError } from "../../Errors/NotFoundError.js";
 import { storageService } from "../../shared/storage/cloudinary.service.js";
 import { users } from "../auth/auth.schema.js";
-import { AuthService } from "../auth/auth.service.js";
-import { updateProfileDto, UserProfileDto } from "./user.dto.js";
+import { authService, AuthService } from "../auth/auth.service.js";
+import { ChangePasswordDto, updateProfileDto, UserProfileDto } from "./user.dto.js";
 import { userRepository } from "./user.repository.js";
+import { comparePassword, hashPassword } from "../../shared/security/bcrypt.js";
+import { BadRequestError } from "../../Errors/BadRequestError.js";
+import { UnauthorizedError } from "../../Errors/UnauthorizedError.js";
+import { authRepository } from "../auth/auth.repository.js";
 
 export class UserService {
   // get Profile
@@ -85,7 +89,61 @@ export class UserService {
       return await userRepository.deleteAvatar(tx, userId);
     });
     return updateUser!;
+
   }
+
+  async changePassword(
+  userId: string,
+  dto: ChangePasswordDto
+): Promise<void> {
+
+  const user = await authRepository.findUserById(userId);
+
+  if (!user) {
+    throw new NotFoundError("User not found.");
+  }
+
+  const isCurrentPasswordValid =
+    await comparePassword(
+      dto.currentPassword,
+      user.passwordHash
+    );
+
+  if (!isCurrentPasswordValid) {
+    throw new UnauthorizedError(
+      "Current password is incorrect."
+    );
+  }
+
+  const isSamePassword =
+    await comparePassword(
+      dto.newPassword,
+      user.passwordHash
+    );
+
+  if (isSamePassword) {
+    throw new BadRequestError(
+      "New password must be different from the current password."
+    );
+  }
+
+  const passwordHash =
+    await hashPassword(dto.newPassword);
+
+  await db.transaction(async (tx) => {
+
+    await userRepository.updatePassword(
+      tx,
+      userId,
+      passwordHash
+    );
+
+    await authService.revokeAllSessions(
+      tx,
+      userId
+    );
+  });
+}
 }
 
 export const userService = new UserService();

@@ -15,3 +15,8 @@ export interface updateProfileDto {
     gender? : string,
     bio? : string
 }
+
+export interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}
