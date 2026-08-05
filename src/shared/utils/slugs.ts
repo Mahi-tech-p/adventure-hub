@@ -7,3 +7,11 @@ export function generateSlug(value: string): string {
     trim: true,
   });
 }
+
+export function generateSlugWithSuffix(slug: string): string {
+  const suffix = Math.random()
+    .toString(36)
+    .substring(2, 6);
+
+  return `${slug}-${suffix}`;
+}
