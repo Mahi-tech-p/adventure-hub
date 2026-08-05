@@ -49,3 +49,5 @@ export interface ParkResponseDto {
 
   createdAt: Date;
 }
+
+export interface UpdateParkDto extends Partial<CreateParkDto>{}

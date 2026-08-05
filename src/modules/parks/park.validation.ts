@@ -35,3 +35,5 @@ export const createParkSchema = z.object({
 
   closingTime: z.string().optional(),
 });
+export const updateParkSchema =
+  createParkSchema.partial();

@@ -4,7 +4,8 @@ import {
   generateSlugWithSuffix,
 } from "../../shared/utils/slugs.js";
 import { parkRepository } from "./park.repository.js";
-import { CreateParkDto } from "./park.dto.js";
+import { CreateParkDto, UpdateParkDto } from "./park.dto.js";
+import { NotFoundError } from "../../Errors/NotFoundError.js";
 
 export class ParkService {
   async createPark(dto: CreateParkDto, createdBy: string) {
@@ -33,6 +34,57 @@ export class ParkService {
       isActive: park.isActive,
     };
   }
+
+async updatePark(
+  parkId: string,
+  dto: UpdateParkDto
+) {
+
+  const existingPark =
+    await parkRepository.findbyId(
+      db,
+      parkId
+    );
+
+  if (!existingPark) {
+    throw new NotFoundError(
+      "Park not found."
+    );
+  }
+
+  let slug = existingPark.slug;
+
+  if (
+    dto.name &&
+    dto.name !== existingPark.name
+  ) {
+
+    slug = generateSlug(dto.name);
+
+    const slugExists =
+      await parkRepository.findBySlug(
+        db,
+        slug
+      );
+
+    if (slugExists) {
+      slug = generateSlugWithSuffix(slug);
+    }
+  }
+
+  return db.transaction(async (tx) => {
+
+    return await parkRepository.updatePark(
+      tx,
+      parkId,
+      {
+        ...dto,
+        slug,
+      }
+    );
+
+  });
+}
 }
 
 export const parkService = new ParkService();
