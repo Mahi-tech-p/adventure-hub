@@ -1,6 +1,9 @@
+import { eq } from "drizzle-orm";
 import { db } from "../../database/db.js";
+import { DBClient } from "../../database/types.js";
 import { NotFoundError } from "../../Errors/NotFoundError.js";
 import { storageService } from "../../shared/storage/cloudinary.service.js";
+import { users } from "../auth/auth.schema.js";
 import { AuthService } from "../auth/auth.service.js";
 import { updateProfileDto, UserProfileDto } from "./user.dto.js";
 import { userRepository } from "./user.repository.js";
@@ -45,6 +48,9 @@ export class UserService {
       if (!exisitingUser) {
         throw new NotFoundError("User notFound....");
       }
+      if (exisitingUser.avatarPublicId) {
+        await storageService.delete(exisitingUser.avatarPublicId);
+      }
       const uploaded = await storageService.upload({
         file,
         fileName: userId,
@@ -57,16 +63,28 @@ export class UserService {
         uploaded.url,
         uploaded.publicId,
       );
-      if (exisitingUser.avatarPublicId) {
-        try {
-          await storageService.delete(exisitingUser.avatarPublicId);
-        } catch (err) {
-          console.error("Failed to delete old avatar:", err);
-        }
-      }
-
       return updatedUser!;
     });
+  }
+
+  async deleteAvatar(userId: string): Promise<UserProfileDto> {
+    const existingUser = await userRepository.findProfileById(db, userId);
+
+    if (!existingUser) {
+      throw new NotFoundError("User Not Found");
+    }
+
+    if (!existingUser.avatarPublicId) {
+      const profile = await userRepository.findProfileById(db, userId);
+      return profile!;
+    }
+
+    await storageService.delete(existingUser.avatarPublicId);
+
+    const updateUser = await db.transaction(async (tx) => {
+      return await userRepository.deleteAvatar(tx, userId);
+    });
+    return updateUser!;
   }
 }
 

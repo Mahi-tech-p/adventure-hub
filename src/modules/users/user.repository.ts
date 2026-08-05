@@ -89,6 +89,29 @@ class UserRepository {
       .from(users)
       .where(eq(users.id, userId));
   }
+
+   async deleteAvatar(client: DBClient, userId: string) {
+    const [user] = await client
+      .update(users)
+      .set({
+        avatarUrl: null,
+        avatarPublicId: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        phone: users.phone,
+        dateOfBirth: users.dateOfBirth,
+        gender: users.gender,
+        avatarUrl: users.avatarUrl,
+        bio: users.bio,
+      });
+      return user
+  }
+
 }
 
 export const userRepository = new UserRepository();

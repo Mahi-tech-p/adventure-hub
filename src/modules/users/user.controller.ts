@@ -27,19 +27,29 @@ export class UserController {
     });
   };
 
-  updateAvatar = async(req: Request, res: Response)=>{
-    if(!req.file){
-      throw new BadRequestError("Avatar is Required")
+  updateAvatar = async (req: Request, res: Response) => {
+    if (!req.file) {
+      throw new BadRequestError("Avatar is Required");
     }
 
-    const user = await userService.uploadAvatar(req.user.id,req.file)
+    const user = await userService.uploadAvatar(req.user.id, req.file);
 
     return res.status(200).json({
       success: true,
       message: "Avatar uploaded successfully",
-      data: user
-    })
-  }
+      data: user,
+    });
+  };
+
+  deleteAvatar = async (req: Request, res: Response) => {
+    const profile = await userService.deleteAvatar(req.user.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Avatar deleted successfully.",
+      data: profile,
+    });
+  };
 }
 
 export const userController = new UserController();

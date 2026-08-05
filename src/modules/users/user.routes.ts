@@ -8,11 +8,26 @@ import { upload } from "../../shared/storage/multer.js";
 
 const router = Router();
 
-router.get("/profile", authenticate,asyncHandler(userController.getProfile))
+router.get("/profile", authenticate, asyncHandler(userController.getProfile));
 
-router.patch('/profile',authenticate, validate(updateProfileSchema), asyncHandler(userController.updateProfile))
+router.patch(
+  "/profile",
+  authenticate,
+  validate(updateProfileSchema),
+  asyncHandler(userController.updateProfile),
+);
 
-router.post("/avatar", authenticate,upload.single("avatar"),asyncHandler(userController.updateAvatar))
+router.post(
+  "/avatar",
+  authenticate,
+  upload.single("avatar"),
+  asyncHandler(userController.updateAvatar),
+);
 
+router.delete(
+  "/avatar",
+  authenticate,
+  asyncHandler(userController.deleteAvatar),
+);
 
-export default router
+export default router;
