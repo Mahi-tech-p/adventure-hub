@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service.js";
 import { success } from "zod";
+import { BadRequestError } from "../../Errors/BadRequestError.js";
 
 export class UserController {
   //get Profile
@@ -25,6 +26,20 @@ export class UserController {
       data: profile,
     });
   };
+
+  updateAvatar = async(req: Request, res: Response)=>{
+    if(!req.file){
+      throw new BadRequestError("Avatar is Required")
+    }
+
+    const user = await userService.uploadAvatar(req.user.id,req.file)
+
+    return res.status(200).json({
+      success: true,
+      message: "Avatar uploaded successfully",
+      data: user
+    })
+  }
 }
 
 export const userController = new UserController();

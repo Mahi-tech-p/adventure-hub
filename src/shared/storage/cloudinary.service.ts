@@ -1,19 +1,22 @@
 import { Readable } from "stream";
 import cloudinary from "./cloudinary.js";
-import {
-  StorageService,
-} from "./storage.interface.js";
-import { UploadResult } from "./storage.types.js";
+
+import { StorageService } from "./storage.interface.js";
+
+import { UploadOptions, UploadResult } from "./storage.types.js";
 
 class CloudinaryStorageService implements StorageService {
-  async upload(
-    file: Express.Multer.File,
-    folder: string
-  ): Promise<UploadResult> {
+  async upload({
+    file,
+    folder,
+    fileName,
+  }: UploadOptions): Promise<UploadResult> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder,
+          public_id: fileName,
+          overwrite: true,
           resource_type: "image",
         },
         (error, result) => {
@@ -25,7 +28,7 @@ class CloudinaryStorageService implements StorageService {
             url: result.secure_url,
             publicId: result.public_id,
           });
-        }
+        },
       );
 
       Readable.from(file.buffer).pipe(uploadStream);
@@ -37,5 +40,4 @@ class CloudinaryStorageService implements StorageService {
   }
 }
 
-export const storageService =
-  new CloudinaryStorageService();
+export const storageService = new CloudinaryStorageService();

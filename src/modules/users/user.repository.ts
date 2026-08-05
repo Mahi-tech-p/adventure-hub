@@ -15,10 +15,11 @@ class UserRepository {
         gender: users.gender,
         avatarUrl: users.avatarUrl,
         bio: users.bio,
+        avatarPublicId: users.avatarPublicId
       })
       .from(users)
       .where(eq(users.id, userId));
-      return user
+    return user;
   }
 
   async updateProfile(
@@ -49,8 +50,45 @@ class UserRepository {
         avatarUrl: users.avatarUrl,
         bio: users.bio,
       });
-      return updatedUser;
+    return updatedUser;
+  }
+
+  async updateAvatar(
+    client: DBClient,
+    userId: string,
+    avatarUrl: string,
+    avatarPublicId: string,
+  ) {
+    const [user] = await client
+      .update(users)
+      .set({
+        avatarUrl,
+        avatarPublicId,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        phone: users.phone,
+        dateOfBirth: users.dateOfBirth,
+        gender: users.gender,
+        avatarUrl: users.avatarUrl,
+        bio: users.bio,
+      });
+    return user;
+  }
+
+  async findAvatarByUserId(client: DBClient, userId: string) {
+    const [user] = await client
+      .select({
+        avatarUrl: users.avatarUrl,
+        avatarPublicId: users.avatarPublicId,
+      })
+      .from(users)
+      .where(eq(users.id, userId));
   }
 }
 
-export const userRepository =  new UserRepository();
+export const userRepository = new UserRepository();
