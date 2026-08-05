@@ -3,7 +3,7 @@ import {
   generateSlug,
   generateSlugWithSuffix,
 } from "../../shared/utils/slugs.js";
-import { parkRepository } from "./park.controller.js";
+import { parkRepository } from "./park.repository.js";
 import { CreateParkDto } from "./park.dto.js";
 
 export class ParkService {
@@ -23,7 +23,15 @@ export class ParkService {
         createdBy,
       });
     });
-    return park;
+    return {
+      id: park.id,
+      name: park.name,
+      slug: park.slug,
+      city: park.city,
+      state: park.state,
+      country: park.country,
+      isActive: park.isActive,
+    };
   }
 }
 

@@ -1,29 +1,24 @@
-import { eq } from "drizzle-orm";
-import { DBClient } from "../../database/types.js";
-import { parks } from "./park.schema.js";
-import { NewPark } from "./park.types.js";
+import { Request, Response } from "express";
 
-class ParkRepository {
-  async createPark(client: DBClient, park: NewPark) {
-    const [createdPark] = await client.insert(parks).values(park).returning();
-    return createdPark;
-  }
+import { parkService } from "./park.service.js";
 
-  //FindBySlug
+export class ParkController {
+  createPark = async (
+    req: Request,
+    res: Response
+  ) => {
 
-  async findBySlug(client: DBClient, slug: string) {
-    const [park] = await client
-      .select()
-      .from(parks)
-      .where(eq(parks.slug, slug));
-    return park;
-  }
+    const park = await parkService.createPark(
+      req.body,
+      req.user.id
+    );
 
-  //findByID
-
-  async findbyId(clent: DBClient, id: string) {
-    const [park] = await clent.select().from(parks).where(eq(parks.id, id));
-  }
+    return res.status(201).json({
+      success: true,
+      message: "Park created successfully.",
+      data: park,
+    });
+  };
 }
 
-export const parkRepository = new ParkRepository()
+export const parkController = new ParkController();
