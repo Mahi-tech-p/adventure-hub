@@ -43,6 +43,13 @@
       "when": 1786027999909,
       "tag": "0005_furry_wallow",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786036314990,
+      "tag": "0006_gigantic_shape",
+      "breakpoints": true
     }
   ]
 }
