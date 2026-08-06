@@ -46,3 +46,39 @@ export const createActivitySchema = z.object({
 
 export const updateActivitySchema =
   createActivitySchema.partial();
+
+export const getActivitiesSchema = z.object({
+
+  page: z.coerce.number().min(1).optional(),
+
+  limit: z.coerce.number().min(1).max(100).optional(),
+
+  search: z.string().optional(),
+
+  parkId: z.uuid().optional(),
+
+  difficulty: z.enum([
+    "EASY",
+    "MEDIUM",
+    "HARD",
+  ]).optional(),
+
+  status: z.enum([
+    "ACTIVE",
+    "MAINTENANCE",
+    "CLOSED",
+  ]).optional(),
+
+  isActive: z.coerce.boolean().optional(),
+
+  sortBy: z.enum([
+    "name",
+    "price",
+    "createdAt",
+  ]).optional(),
+
+  order: z.enum([
+    "asc",
+    "desc",
+  ]).optional(),
+});

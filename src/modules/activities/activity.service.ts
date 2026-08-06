@@ -98,6 +98,8 @@ export class ActivityService {
       createdAt: activity.createdAt,
     };
   }
+
+  async getActvities()
 }
 
 export const activityService = new ActivityService();

@@ -1,3 +1,5 @@
+import { PaginationQueryDto } from "../../shared/pagination/pagination.dto.js";
+
 export interface CreateActivityDto {
   parkId: string;
 
@@ -59,4 +61,12 @@ export interface ActivityResponseDto {
   isActive: boolean;
 
   createdAt: Date;
+}
+
+export interface GetActivitiesDto extends PaginationQueryDto {
+  parkId?: string;
+
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  status?: "ACTIVE" | "MAINTENANCE" | "CLOSED";
+  isActive?: boolean
 }
