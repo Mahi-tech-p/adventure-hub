@@ -1,3 +1,5 @@
+import { PaginationQueryDto } from "../../shared/pagination/pagination.dto.js";
+
 export interface CreateParkDto {
   name: string;
   description?: string;
@@ -48,6 +50,13 @@ export interface ParkResponseDto {
   isVerified: boolean;
 
   createdAt: Date;
+}
+
+export interface GetParkQueryDto extends PaginationQueryDto{
+  city?: string,
+  state?:string,
+  country?: string,
+  isActive?: boolean
 }
 
 export interface UpdateParkDto extends Partial<CreateParkDto>{}
