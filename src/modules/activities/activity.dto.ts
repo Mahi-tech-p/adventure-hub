@@ -63,10 +63,10 @@ export interface ActivityResponseDto {
   createdAt: Date;
 }
 
-export interface GetActivitiesDto extends PaginationQueryDto {
+export interface GetActivitiesQueryDto extends PaginationQueryDto {
   parkId?: string;
 
-  difficulty: "EASY" | "MEDIUM" | "HARD";
+  difficulty?: "EASY" | "MEDIUM" | "HARD";
   status?: "ACTIVE" | "MAINTENANCE" | "CLOSED";
   isActive?: boolean
 }

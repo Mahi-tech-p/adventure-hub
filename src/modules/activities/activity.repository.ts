@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, ilike, SQL } from "drizzle-orm";
 import { DBClient } from "../../database/types.js";
 import { activities } from "./activity.schems.js";
 import { NewActivity } from "./activity.types.js";
-import { GetActivitiesDto } from "./activity.dto.js";
+import { GetActivitiesQueryDto } from "./activity.dto.js";
 
 class ActivityRepository {
   async createActivity(client: DBClient, activity: NewActivity) {
@@ -76,7 +76,7 @@ class ActivityRepository {
     return activity;
   }
 
-  async findAll(client: DBClient, query: GetActivitiesDto) {
+  async findAll(client: DBClient, query: GetActivitiesQueryDto) {
     const page = Number(query.page ?? 1);
     const limit = Number(query.limit ?? 10);
     const offset = (page - 1) * limit;

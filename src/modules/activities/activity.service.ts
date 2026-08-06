@@ -3,7 +3,7 @@ import { db } from "../../database/db.js";
 import { NotFoundError } from "../../Errors/NotFoundError.js";
 import { BadRequestError } from "../../Errors/BadRequestError.js";
 
-import { ActivityResponseDto, CreateActivityDto } from "./activity.dto.js";
+import { ActivityResponseDto, CreateActivityDto,  GetActivitiesQueryDto } from "./activity.dto.js";
 
 import { activityRepository } from "./activity.repository.js";
 import { parkRepository } from "../parks/park.repository.js";
@@ -99,7 +99,9 @@ export class ActivityService {
     };
   }
 
-  async getActvities()
+  async getActvities(query: GetActivitiesQueryDto){
+    return await activityRepository.findAll(db,query)
+  }
 }
 
 export const activityService = new ActivityService();
