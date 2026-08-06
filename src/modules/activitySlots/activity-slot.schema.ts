@@ -7,67 +7,52 @@ import {
   numeric,
   timestamp,
   pgEnum,
+  unique,
+  index,
 } from "drizzle-orm/pg-core";
+
 import { activities } from "../activities/activity.schems.js";
 
-
-export const slotStatusEnum = pgEnum(
-  "slot_status",
-  [
-    "AVAILABLE",
-    "FULL",
-    "CANCELLED",
-  ]
-);
+export const slotStatusEnum = pgEnum("slot_status", [
+  "AVAILABLE",
+  "FULL",
+  "CANCELLED",
+]);
 
 export const activitySlots = pgTable(
   "activity_slots",
   {
-
-    id: uuid("id")
-      .primaryKey()
-      .defaultRandom(),
+    id: uuid("id").primaryKey().defaultRandom(),
 
     activityId: uuid("activity_id")
       .references(() => activities.id)
       .notNull(),
 
-    slotDate: date("slot_date")
-      .notNull(),
+    slotDate: date("slot_date").notNull(),
 
-    startTime: time("start_time")
-      .notNull(),
+    startTime: time("start_time").notNull(),
 
-    endTime: time("end_time")
-      .notNull(),
+    endTime: time("end_time").notNull(),
 
-    capacity: integer("capacity")
-      .notNull(),
+    capacity: integer("capacity").notNull(),
 
-    bookedCount: integer("booked_count")
-      .default(0)
-      .notNull(),
+    bookedCount: integer("booked_count").default(0).notNull(),
 
-    priceOverride: numeric(
-      "price_override",
-      {
-        precision: 10,
-        scale: 2,
-      }
-    ),
+    priceOverride: numeric("price_override", {
+      precision: 10,
+      scale: 2,
+    }),
 
-    status: slotStatusEnum("status")
-      .default("AVAILABLE")
-      .notNull(),
+    status: slotStatusEnum("status").default("AVAILABLE").notNull(),
 
-    createdAt: timestamp("created_at")
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
 
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 
     deletedAt: timestamp("deleted_at"),
-  }
+  },
+  (table) => ({
+    uniqueSlot: unique().on(table.activityId, table.slotDate, table.startTime),
+    activityIdIdx: index("activity_slots_activity_id_idx").on(table.activityId),
+  }),
 );

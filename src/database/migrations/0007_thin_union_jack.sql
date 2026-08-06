@@ -1,0 +1,2 @@
+CREATE INDEX "activity_slots_activity_id_idx" ON "activity_slots" USING btree ("activity_id");--> statement-breakpoint
+ALTER TABLE "activity_slots" ADD CONSTRAINT "activity_slots_activity_id_slot_date_start_time_unique" UNIQUE("activity_id","slot_date","start_time");
