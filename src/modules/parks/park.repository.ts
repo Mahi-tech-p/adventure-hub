@@ -24,6 +24,7 @@ class ParkRepository {
 
   async findbyId(clent: DBClient, id: string) {
     const [park] = await clent.select().from(parks).where(eq(parks.id, id));
+    return park
   }
 
   async updatePark(client: DBClient, parkId: string, data: Partial<NewPark>) {
