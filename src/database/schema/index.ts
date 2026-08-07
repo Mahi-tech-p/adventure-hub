@@ -3,3 +3,5 @@ export * from '../../modules/parks/park.schema.js'
 export * from "../../modules/activities/activity.schems.js"
 
 export * from "../../modules/activitySlots/activity-slot.schema.js"
+
+export * from "../../modules/bookings/booking.schema.js"
