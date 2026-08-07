@@ -16,3 +16,18 @@ export interface VerifyPaymentDto {
   razorpayPaymentId: string;
   razorpaySignature: string;
 }
+
+export interface RazorpayWebhookDto {
+  event: string;
+  payload: {
+    payment: {
+      entity: {
+        id: string;
+        order_id: string;
+        amount: number;
+        currency: string;
+        status: string;
+      };
+    };
+  };
+}

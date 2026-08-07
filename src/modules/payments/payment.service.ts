@@ -7,7 +7,7 @@ import { NotFoundError } from "../../Errors/NotFoundError.js";
 
 import { bookings } from "../bookings/booking.schema.js";
 
-import { CreatePaymentDto, VerifyPaymentDto } from "./payment.dto.js";
+import { CreatePaymentDto, RazorpayWebhookDto, VerifyPaymentDto } from "./payment.dto.js";
 
 import { PaymentResponseDto } from "./payment.types.js";
 import { paymentGateway } from "./razorpay.getway.js";
@@ -209,6 +209,87 @@ class PaymentService {
 
     return result;
   }
+  async handleWebhook(payload: RazorpayWebhookDto) {
+  const event = payload.event;
+
+  if (
+    event !== "payment.captured" &&
+    event !== "payment.failed"
+  ) {
+    return;
+  }
+
+  const paymentEntity =
+    payload.payload.payment.entity;
+
+  const gatewayOrderId =
+    paymentEntity.order_id;
+
+  const gatewayPaymentId =
+    paymentEntity.id;
+
+  const payment =
+    await paymentRepository.findByGatewayOrderId(
+      db,
+      gatewayOrderId
+    );
+
+  if (!payment) {
+    throw new NotFoundError(
+      "Payment associated with this Razorpay order was not found."
+    );
+  }
+
+
+  if (payment.status === "SUCCESS") {
+    return payment;
+  }
+
+
+  if (event === "payment.captured") {
+    return await db.transaction(async (tx) => {
+      const updatedPayment =
+        await paymentRepository.update(
+          tx,
+          payment.id,
+          {
+            gatewayPaymentId,
+            status: "SUCCESS",
+            paidAt: new Date(),
+          }
+        );
+
+      await tx
+        .update(bookings)
+        .set({
+          status: "CONFIRMED",
+          updatedAt: new Date(),
+        })
+        .where(
+          eq(
+            bookings.id,
+            payment.bookingId
+          )
+        );
+
+      return updatedPayment;
+    });
+  }
+
+
+  if (event === "payment.failed") {
+    return await paymentRepository.update(
+      db,
+      payment.id,
+      {
+        gatewayPaymentId,
+        status: "FAILED",
+        failureReason:
+          "Razorpay payment failed.",
+      }
+    );
+  }
+}
 }
 
 export const paymentService = new PaymentService();
