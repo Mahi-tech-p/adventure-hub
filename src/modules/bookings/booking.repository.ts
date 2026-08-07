@@ -28,11 +28,10 @@ class BookingRepository {
   }
 
   async findByUser(client: DBClient, userdId: string) {
-    const [booking] = await client
+    return await client
       .select()
       .from(bookings)
       .where(eq(bookings.userId, userdId));
-    return booking;
   }
 
   async updateBooking(
@@ -75,6 +74,20 @@ class BookingRepository {
       .returning();
 
     return slot;
+  }
+
+  async findByIdAndUserForUpdate(
+    client: DBClient,
+    bookingId: string,
+    userId: string,
+  ) {
+    const [booking] = await client
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, bookingId), eq(bookings.userId, userId)))
+      .for("update");
+
+    return booking;
   }
 }
 

@@ -6,6 +6,7 @@ import { activities } from "../activities/activity.schems.js";
 import { BookingResponseDto, CreateBookingDto } from "./booking.dto.js";
 import { bookingRepository } from "./booking.repository.js";
 import { activitySlots } from "../activitySlots/activity-slot.schema.js";
+import { bookings } from "./booking.schema.js";
 class BookingService {
   async createBooking(
     userId: string,
@@ -117,6 +118,127 @@ class BookingService {
 
       status: booking.status,
 
+      createdAt: booking.createdAt,
+    };
+  }
+
+  async getBooking(
+    userId: string,
+    bookingId: string,
+  ): Promise<BookingResponseDto> {
+    const booking = await bookingRepository.findByIdAndUser(
+      db,
+      bookingId,
+      userId,
+    );
+
+    if (!booking) {
+      throw new NotFoundError("Booking not found.");
+    }
+
+    return {
+      id: booking.id,
+      bookingReference: booking.bookingReference,
+      userId: booking.userId,
+      activityId: booking.activityId,
+      slotId: booking.slotId,
+      numberOfTickets: booking.numberOfTickets,
+      pricePerTicket: booking.pricePerTicket,
+      totalAmount: booking.totalAmount,
+      status: booking.status,
+      createdAt: booking.createdAt,
+    };
+  }
+
+  async getMyBookings(userId: string): Promise<BookingResponseDto[]> {
+    const bookings = await bookingRepository.findByUser(db, userId);
+
+    return bookings.map((booking) => ({
+      id: booking.id,
+      bookingReference: booking.bookingReference,
+      userId: booking.userId,
+      activityId: booking.activityId,
+      slotId: booking.slotId,
+      numberOfTickets: booking.numberOfTickets,
+      pricePerTicket: booking.pricePerTicket,
+      totalAmount: booking.totalAmount,
+      status: booking.status,
+      createdAt: booking.createdAt,
+    }));
+  }
+
+  async cancelBooking(
+    userId: string,
+    bookingId: string,
+  ): Promise<BookingResponseDto> {
+    const booking = await db.transaction(async (tx) => {
+      const booking = await bookingRepository.findByIdAndUserForUpdate(
+        tx,
+        bookingId,
+        userId,
+      );
+
+      if (!booking) {
+        throw new NotFoundError("Booking not found.");
+      }
+
+      if (booking.status === "CANCELLED") {
+        throw new BadRequestError("Booking is already cancelled.");
+      }
+
+      if (booking.status === "COMPLETED") {
+        throw new BadRequestError("Completed bookings cannot be cancelled.");
+      }
+
+      const slot = await bookingRepository.findSlotForUpdate(
+        tx,
+        booking.slotId,
+      );
+
+      if (!slot) {
+        throw new NotFoundError("Activity slot not found.");
+      }
+
+      const newBookedCount = Math.max(
+        0,
+        slot.bookedCount - booking.numberOfTickets,
+      );
+
+      const newStatus = newBookedCount < slot.capacity ? "AVAILABLE" : "FULL";
+
+      const [updatedBooking] = await tx
+        .update(bookings)
+        .set({
+          status: "CANCELLED",
+          updatedAt: new Date(),
+        })
+        .where(eq(bookings.id, booking.id))
+        .returning();
+
+      await tx
+        .update(activitySlots)
+        .set({
+          bookedCount: newBookedCount,
+
+          status: newStatus,
+
+          updatedAt: new Date(),
+        })
+        .where(eq(activitySlots.id, slot.id));
+
+      return updatedBooking;
+    });
+
+    return {
+      id: booking.id,
+      bookingReference: booking.bookingReference,
+      userId: booking.userId,
+      activityId: booking.activityId,
+      slotId: booking.slotId,
+      numberOfTickets: booking.numberOfTickets,
+      pricePerTicket: booking.pricePerTicket,
+      totalAmount: booking.totalAmount,
+      status: booking.status,
       createdAt: booking.createdAt,
     };
   }
