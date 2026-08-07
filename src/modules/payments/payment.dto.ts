@@ -11,3 +11,8 @@ export interface PaymentWebhookDto {
   status: "SUCCESS" | "FAILED";
   signature: string;
 }
+export interface VerifyPaymentDto {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}

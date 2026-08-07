@@ -7,156 +7,115 @@ import { NotFoundError } from "../../Errors/NotFoundError.js";
 
 import { bookings } from "../bookings/booking.schema.js";
 
+import { CreatePaymentDto, VerifyPaymentDto } from "./payment.dto.js";
 
-import {
-  CreatePaymentDto,
-} from "./payment.dto.js";
-
-import {
-  PaymentResponseDto,
-} from "./payment.types.js";
+import { PaymentResponseDto } from "./payment.types.js";
 import { paymentGateway } from "./razorpay.getway.js";
 import { paymentRepository } from "./payment.respository.js";
 
 class PaymentService {
   async createPayment(
     userId: string,
-    dto: CreatePaymentDto
+    dto: CreatePaymentDto,
   ): Promise<PaymentResponseDto> {
+    const result = await db.transaction(async (tx) => {
+      // -----------------------------------------
+      // 1. Find booking
+      // -----------------------------------------
 
-    const result = await db.transaction(
-      async (tx) => {
+      const [booking] = await tx
+        .select()
+        .from(bookings)
+        .where(eq(bookings.id, dto.bookingId));
 
-        // -----------------------------------------
-        // 1. Find booking
-        // -----------------------------------------
-
-        const [booking] = await tx
-          .select()
-          .from(bookings)
-          .where(
-            eq(
-              bookings.id,
-              dto.bookingId
-            )
-          );
-
-        if (!booking) {
-          throw new NotFoundError(
-            "Booking not found."
-          );
-        }
-
-        // -----------------------------------------
-        // 2. Verify ownership
-        // -----------------------------------------
-
-        if (booking.userId !== userId) {
-          throw new BadRequestError(
-            "You are not allowed to pay for this booking."
-          );
-        }
-
-        // -----------------------------------------
-        // 3. Verify booking status
-        // -----------------------------------------
-
-        if (booking.status !== "PENDING") {
-          throw new BadRequestError(
-            "Payment can only be created for a pending booking."
-          );
-        }
-
-        // -----------------------------------------
-        // 4. Check existing payment
-        // -----------------------------------------
-
-        const existingPayment =
-          await paymentRepository.findByBookingId(
-            tx,
-            booking.id
-          );
-
-        if (existingPayment) {
-
-          if (
-            existingPayment.status ===
-            "SUCCESS"
-          ) {
-            throw new BadRequestError(
-              "This booking has already been paid."
-            );
-          }
-
-          if (
-            existingPayment.status ===
-            "PENDING"
-          ) {
-            return existingPayment;
-          }
-        }
-
-        // -----------------------------------------
-        // 5. Generate payment reference
-        // -----------------------------------------
-
-        const paymentReference =
-          `PAY-${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 8)
-            .toUpperCase()}`;
-
-        // -----------------------------------------
-        // 6. Create Razorpay order
-        // -----------------------------------------
-
-        const gatewayPayment =
-          await paymentGateway.createPayment({
-            paymentReference,
-
-            amount:
-              booking.totalAmount,
-
-            currency:
-              "INR",
-
-            method:
-              dto.method,
-          });
-
-        // -----------------------------------------
-        // 7. Create payment record
-        // -----------------------------------------
-
-        const payment =
-          await paymentRepository.create(
-            tx,
-            {
-              bookingId:
-                booking.id,
-
-              paymentReference,
-
-              gatewayOrderId:
-                gatewayPayment.gatewayOrderId,
-
-              amount:
-                booking.totalAmount,
-
-              currency:
-                "INR",
-
-              method:
-                dto.method,
-
-              status:
-                "PENDING",
-            }
-          );
-
-        return payment;
+      if (!booking) {
+        throw new NotFoundError("Booking not found.");
       }
-    );
+
+      // -----------------------------------------
+      // 2. Verify ownership
+      // -----------------------------------------
+
+      if (booking.userId !== userId) {
+        throw new BadRequestError(
+          "You are not allowed to pay for this booking.",
+        );
+      }
+
+      // -----------------------------------------
+      // 3. Verify booking status
+      // -----------------------------------------
+
+      if (booking.status !== "PENDING") {
+        throw new BadRequestError(
+          "Payment can only be created for a pending booking.",
+        );
+      }
+
+      // -----------------------------------------
+      // 4. Check existing payment
+      // -----------------------------------------
+
+      const existingPayment = await paymentRepository.findByBookingId(
+        tx,
+        booking.id,
+      );
+
+      if (existingPayment) {
+        if (existingPayment.status === "SUCCESS") {
+          throw new BadRequestError("This booking has already been paid.");
+        }
+
+        if (existingPayment.status === "PENDING") {
+          return existingPayment;
+        }
+      }
+
+      // -----------------------------------------
+      // 5. Generate payment reference
+      // -----------------------------------------
+
+      const paymentReference = `PAY-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 8)
+        .toUpperCase()}`;
+
+      // -----------------------------------------
+      // 6. Create Razorpay order
+      // -----------------------------------------
+
+      const gatewayPayment = await paymentGateway.createPayment({
+        paymentReference,
+
+        amount: booking.totalAmount,
+
+        currency: "INR",
+
+        method: dto.method,
+      });
+
+      // -----------------------------------------
+      // 7. Create payment record
+      // -----------------------------------------
+
+      const payment = await paymentRepository.create(tx, {
+        bookingId: booking.id,
+
+        paymentReference,
+
+        gatewayOrderId: gatewayPayment.gatewayOrderId,
+
+        amount: booking.totalAmount,
+
+        currency: "INR",
+
+        method: dto.method,
+
+        status: "PENDING",
+      });
+
+      return payment;
+    });
 
     // -----------------------------------------
     // 8. Return checkout information
@@ -165,32 +124,91 @@ class PaymentService {
     return {
       id: result.id,
 
-      bookingId:
-        result.bookingId,
+      bookingId: result.bookingId,
 
-      paymentReference:
-        result.paymentReference,
+      paymentReference: result.paymentReference,
 
-      gatewayOrderId:
-        result.gatewayOrderId!,
+      gatewayOrderId: result.gatewayOrderId!,
 
-      amount:
-        result.amount,
+      amount: result.amount,
 
-      currency:
-        result.currency,
+      currency: result.currency,
 
-      method:
-        result.method,
+      method: result.method,
 
-      status:
-        result.status,
+      status: result.status,
 
-      createdAt:
-        result.createdAt,
+      createdAt: result.createdAt,
     };
+  }
+  async verifyPayment(userId: string, dto: VerifyPaymentDto) {
+    const payment = await paymentRepository.findByGatewayOrderId(
+      db,
+      dto.razorpayOrderId,
+    );
+
+    if (!payment) {
+      throw new NotFoundError("Payment not found.");
+    }
+
+    const [booking] = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.id, payment.bookingId));
+
+    if (!booking) {
+      throw new NotFoundError("Booking not found.");
+    }
+
+    if (booking.userId !== userId) {
+      throw new BadRequestError("You are not allowed to verify this payment.");
+    }
+
+    if (payment.status === "SUCCESS") {
+      return payment;
+    }
+
+    if (payment.status !== "PENDING") {
+      throw new BadRequestError("Payment cannot be verified.");
+    }
+
+    const isValid = await paymentGateway.verifyPayment(
+      dto.razorpayOrderId,
+      dto.razorpayPaymentId,
+      dto.razorpaySignature,
+    );
+
+    if (!isValid) {
+      await paymentRepository.update(db, payment.id, {
+        status: "FAILED",
+        failureReason: "Invalid Razorpay payment signature.",
+      });
+
+      throw new BadRequestError("Invalid payment signature.");
+    }
+
+    const result = await db.transaction(async (tx) => {
+      const updatedPayment = await paymentRepository.update(tx, payment.id, {
+        gatewayPaymentId: dto.razorpayPaymentId,
+
+        status: "SUCCESS",
+
+        paidAt: new Date(),
+      });
+
+      await tx
+        .update(bookings)
+        .set({
+          status: "CONFIRMED",
+          updatedAt: new Date(),
+        })
+        .where(eq(bookings.id, payment.bookingId));
+
+      return updatedPayment;
+    });
+
+    return result;
   }
 }
 
-export const paymentService =
-  new PaymentService();
+export const paymentService = new PaymentService();
