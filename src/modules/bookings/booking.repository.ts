@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { DBClient } from "../../database/types.js";
 import { bookings } from "./booking.schema.js";
 import { NewBooking } from "./booking.types.js";
@@ -60,7 +60,6 @@ class BookingRepository {
       .for("update");
     return slot;
   }
-
   async incrementBookedCount(
     client: DBClient,
     slotId: string,
@@ -69,7 +68,7 @@ class BookingRepository {
     const [slot] = await client
       .update(activitySlots)
       .set({
-        bookedCount: activitySlots.bookedCount,
+        bookedCount: sql`${activitySlots.bookedCount} + ${numberOfTickets}`,
         updatedAt: new Date(),
       })
       .where(eq(activitySlots.id, slotId))
